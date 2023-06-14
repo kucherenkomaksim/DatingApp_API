@@ -1,30 +1,29 @@
 using System.Net;
 using API.Data;
 using API.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-[ApiController]
-[Consumes("application/json")]
-[Produces("application/json")]
 [ProducesResponseType(typeof(ActionResult<AppUser>), (int)HttpStatusCode.OK)]
 [ProducesResponseType(typeof(ActionResult<AppUser>), (int)HttpStatusCode.BadRequest)]
-[Route("api/[controller]")]
-public class UsersController : ControllerBase
+[Authorize]
+public class UsersController : BaseApiController
 {
-    private readonly DataContext context;
+    private readonly DataContext _context;
     
     public UsersController(DataContext context)
     {
-        this.context = context;
+        _context = context;
     }
-
+    
+    // [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers(CancellationToken cancellationToken)
     {
-        var users = await context.Users.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var users = await _context.Users.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return users;
     }
@@ -32,7 +31,7 @@ public class UsersController : ControllerBase
     [HttpGet("{id:long}")]
     public async Task<ActionResult<AppUser>> GetUser(long id, CancellationToken cancellationToken)
     {
-        var user = await context.Users.FindAsync(new object?[] { id }, cancellationToken).ConfigureAwait(false);
+        var user = await _context.Users.FindAsync(new object?[] { id }, cancellationToken).ConfigureAwait(false);
 
         return (user is not null) ? user : BadRequest();
     }

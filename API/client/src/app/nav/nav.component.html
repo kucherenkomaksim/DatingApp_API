@@ -5,7 +5,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0" *ngIf="accountService.currentUser$ | async">
         <li class="nav-item">
           <a class="nav-link" href="#">Matches</a>
         </li>
@@ -16,9 +16,28 @@
           <a class="nav-link">Messages</a>
         </li>
       </ul>
-      <form class="d-flex">
-        <input class="form-control me-2" type="text" placeholder="UserName">
-        <input class="form-control me-2" type="password" placeholder="Password">
+
+      <div class="dropdown" *ngIf="accountService.currentUser$ | async" dropdown>
+        <a class="dropdown-toggle text-light text-decoration-none" dropdownToggle aria-controls="dropdown-animated">Welcome user</a>
+        <div class="dropdown-menu mt-3" id="dropdown-animated" *dropdownMenu role="menu" aria-labelledby="button-animated">
+          <a class="dropdown-item" role="menuitem">Edit Profile</a>
+          <a class="dropdown-item" role="menuitem" (click)="logout()">Logout</a>
+        </div>
+      </div>
+
+      <form *ngIf="!(accountService.currentUser$ | async)" #loginForm="ngForm" class="d-flex" (ngSubmit)="login()" autocomplete="off">
+        <input
+          name="username"
+          [(ngModel)]="model.username"
+          class="form-control me-2"
+          type="text"
+          placeholder="UserName">
+        <input
+          name="password"
+          [(ngModel)]="model.password"
+          class="form-control me-2"
+          type="password"
+          placeholder="Password">
         <button class="btn btn-outline-success" type="submit">Login</button>
       </form>
     </div>

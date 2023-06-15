@@ -4,11 +4,13 @@ using API.Data;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
+[AllowAnonymous]
 public class AccountController : BaseApiController
 {
     private readonly DataContext _context;
@@ -19,7 +21,7 @@ public class AccountController : BaseApiController
         _context = context;
         _tokenService = tokenService;
     }
-
+    
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register([FromBody] RegisterDto dto, CancellationToken cancellationToken)
     {
@@ -48,7 +50,7 @@ public class AccountController : BaseApiController
         
         return Ok(userDto);
     }
-
+    
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto dto, CancellationToken cancellationToken)
     {
@@ -62,7 +64,7 @@ public class AccountController : BaseApiController
 
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
 
-        if (computedHash.Where((t, i) => t != dto.Password[i]).Any())
+        if (computedHash.Where((t, i) => t != user.PasswordHash[i]).Any())
         {
             return Unauthorized("Invalid password");
         }

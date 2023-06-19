@@ -21,6 +21,9 @@ public static class ApplicationServiceExtensions
         
         serviceCollection.AddCors();
         serviceCollection.AddScoped<ITokenService, TokenService>();
+        serviceCollection.AddScoped<IUserRepository, UserRepository>();
+        serviceCollection.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        
         serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {

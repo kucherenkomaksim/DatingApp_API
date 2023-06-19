@@ -1,9 +1,9 @@
 using System.Net;
-using API.Data;
+using API.DTO;
 using API.Entities;
+using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
@@ -12,27 +12,28 @@ namespace API.Controllers;
 [Authorize]
 public class UsersController : BaseApiController
 {
-    private readonly DataContext _context;
-    
-    public UsersController(DataContext context)
+    private readonly IUserRepository _userRepository;
+
+    public UsersController(IUserRepository userRepository)
     {
-        _context = context;
+        _userRepository = userRepository;
     }
     
-    // [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers(CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
     {
-        var users = await _context.Users.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var users = await _userRepository.GetMembersAsync().ConfigureAwait(false);
 
-        return users;
+        return Ok(users);
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<ActionResult<AppUser>> GetUser(long id, CancellationToken cancellationToken)
+    [HttpGet("{username}")]
+    public async Task<ActionResult<MemberDto>> GetUser(string username)
     {
-        var user = await _context.Users.FindAsync(new object?[] { id }, cancellationToken).ConfigureAwait(false);
+        var user = await _userRepository.GetMemberAsync(username).ConfigureAwait(false);
 
-        return (user is not null) ? user : BadRequest();
+        return (user is not null) 
+            ? Ok(user)
+            : BadRequest();
     }
 }
